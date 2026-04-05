@@ -1,0 +1,9 @@
+@最初に置くやつ
+--information:最初に置くやつ@PSDToolKitExt
+--label:PSDToolKit
+local ok, ext = pcall(require, "PSDToolKitExt")
+if not ok then
+    package.loaded["PSDToolKitExt"] = nil
+    ext = require("PSDToolKitExt")
+end
+ext.new_frame()

@@ -1,8 +1,10 @@
 ﻿param(
-    [string]$Target = "src/PSDToolKit.lua"
+    [string]$Target = "data/Script/PSDToolKitExt.lua"
 )
 
 $ErrorActionPreference = "Stop"
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$resolvedTarget = Join-Path $repoRoot $Target
 
 $candidates = @(
     "luac",
@@ -29,8 +31,13 @@ if (-not $compiler) {
     throw "Lua compiler not found. Tried: $($candidates -join ', ')"
 }
 
+if (-not (Test-Path $resolvedTarget)) {
+    throw "Lua file not found: $resolvedTarget"
+}
+
 Write-Host "Using Lua compiler: $compiler"
-& $compiler -p $Target
+Write-Host "Checking $resolvedTarget"
+& $compiler -p $resolvedTarget
 if ($LASTEXITCODE -ne 0) {
-    throw "Lua syntax check failed: $Target"
+    throw "Lua syntax check failed: $resolvedTarget"
 }

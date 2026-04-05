@@ -1,22 +1,31 @@
 ﻿# aviutl2-psdtoolkit2-ext
 
-ローカルの `PSDToolKit` 構成を参考にした、AviUtl2 Script 系 repo の雛形です。
-公開先は `flowrebmitmk2-a11y/aviutl2-psdtoolkit2-ext` を想定しています。
+`aviutl2-psdtoolkit2-ext` は AviUtl2 用のプラグインです。PSDToolKitExt 用の Lua と `.obj2`、`.anm2` を追加します。
 
-## 目的
+## 導入方法
 
-- plugin repo とは別に script 系資産を管理する
-- `PSDToolKit.lua` の upstream 変更を追いやすくする
-- GitHub Actions で Lua 構文チェックと upstream 差分確認を行う
+1. release zip を AviUtl2 に取り込みます。
+2. 手動で入れる場合は `data/Script/` 配下の 3 ファイルを AviUtl2 の `data/Script/` へコピーします。
+3. 必要に応じて AviUtl2 を再起動します。
+
+## AviUtl2 上での簡単な使い方
+
+1. `PSDToolKit` 本体を導入した状態で使います。
+2. `@PSDToolKitExt.obj2` や `@PSDToolKitExt.anm2` を読み込むと `PSDToolKitExt.lua` が呼ばれます。
+3. upstream の `PSDToolKit.lua` が変わったら互換性を見直します。
 
 ## 構成
 
-- `src/PSDToolKit.lua`: 追跡対象の Lua スクリプト
-- `src/@PSDToolKit.obj2`: object 定義
-- `src/@PSDToolKit.anm2`: animation 定義
-- `scripts/check-lua-syntax.ps1`: Lua 構文チェック
-- `scripts/check-upstream.ps1`: upstream との差分確認
+- `data/Script/@PSDToolKitExt.anm2`
+- `data/Script/@PSDToolKitExt.obj2`
+- `data/Script/PSDToolKitExt.lua`
+- `upstream/PSDToolKit.lua.sha256`: 確認済み upstream Lua のハッシュ
+- `scripts/check-lua-syntax.ps1`: `PSDToolKitExt.lua` の構文チェック
+- `scripts/check-upstream.ps1`: upstream `PSDToolKit.lua` の変更検知
 
-## upstream 追跡
+## 検証
 
-GitHub Actions で自動比較したい場合は `UPSTREAM_PSDTOOLKIT_URL` を設定して使います。
+GitHub Actions では次を確認します。
+
+- `PSDToolKitExt.lua` の構文チェック
+- upstream `PSDToolKit.lua` の変更検知

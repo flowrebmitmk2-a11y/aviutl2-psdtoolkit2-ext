@@ -1,0 +1,72 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
+
+jobs:
+  release:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        shell: powershell
+        run: |
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            $version = '${{ github.event.inputs.version }}'
+          } else {
+            $version = '${{ github.ref_name }}'
+            if ($version.StartsWith('v')) {
+              $version = $version.Substring(1)
+            }
+          }
+          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Update version files
+        if: github.event_name == 'workflow_dispatch'
+        shell: powershell
+        run: |
+          Set-Content -LiteralPath VERSION -Value $env:RELEASE_VERSION -Encoding utf8
+          $toml = Get-Content -LiteralPath aviutl2.toml -Raw
+          $toml = $toml -replace 'version = "\d+\.\d+\.\d+"', ('version = "' + $env:RELEASE_VERSION + '"')
+          Set-Content -LiteralPath aviutl2.toml -Value $toml -Encoding utf8
+
+      - name: Validate Lua syntax
+        shell: powershell
+        run: choco install lua --no-progress -y; ./scripts/check-lua-syntax.ps1
+
+      - name: Build package
+        shell: powershell
+        run: ./scripts/build-package.ps1 -Version $env:RELEASE_VERSION
+
+      - name: Commit version change
+        if: github.event_name == 'workflow_dispatch'
+        shell: powershell
+        run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "actions@github.com"
+          git add VERSION aviutl2.toml
+          git commit -m "release: v$env:RELEASE_VERSION"
+          git tag "v$env:RELEASE_VERSION"
+
+      - name: Push tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: powershell
+        run: git push && git push --tags
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          body_path: ./release/README.md
+          files: ./release/aviutl2-psdtoolkit2-ext-v${{ env.RELEASE_VERSION }}.au2pkg.zip
