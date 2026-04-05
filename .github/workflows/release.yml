@@ -41,9 +41,13 @@ jobs:
           $toml = $toml -replace 'version = "\d+\.\d+\.\d+"', ('version = "' + $env:RELEASE_VERSION + '"')
           Set-Content -LiteralPath aviutl2.toml -Value $toml -Encoding utf8
 
+      - name: Install Lua
+        shell: powershell
+        run: choco install lua --no-progress -y
+
       - name: Validate Lua syntax
         shell: powershell
-        run: choco install lua --no-progress -y; ./scripts/check-lua-syntax.ps1
+        run: ./scripts/check-lua-syntax.ps1
 
       - name: Build package
         shell: powershell
