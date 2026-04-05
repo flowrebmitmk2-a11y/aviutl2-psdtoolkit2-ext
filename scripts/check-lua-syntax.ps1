@@ -1,8 +1,11 @@
 ﻿param(
-    [string]$LuaCommand = "lua",
+    [string]$LuaCompiler = "luac",
     [string]$Target = "src/PSDToolKit.lua"
 )
 
 $ErrorActionPreference = "Stop"
 
-& $LuaCommand -p $Target
+& $LuaCompiler -p $Target
+if ($LASTEXITCODE -ne 0) {
+    throw "Lua syntax check failed: $Target"
+}
