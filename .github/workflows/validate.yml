@@ -1,0 +1,29 @@
+﻿name: validate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 19 * * 0"
+
+jobs:
+  validate:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua
+        shell: powershell
+        run: choco install lua --no-progress -y
+
+      - name: Check Lua syntax
+        shell: powershell
+        run: ./scripts/check-lua-syntax.ps1
+
+      - name: Check upstream PSDToolKit
+        shell: powershell
+        env:
+          UPSTREAM_PSDTOOLKIT_URL: ${{ secrets.UPSTREAM_PSDTOOLKIT_URL }}
+        run: ./scripts/check-upstream.ps1
